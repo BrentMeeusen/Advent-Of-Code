@@ -10,7 +10,7 @@ def parse_instruction(instruction: str) -> int:
     return int(instruction[1:]) * (1 if instruction[0] == "R" else -1)
 
 
-def solve_day_1(instructions: list[str]) -> int:
+def solve_day_1_pt_1(instructions: list[str]) -> int:
     current_pos = 50
     zero_count = 0
 
@@ -23,5 +23,26 @@ def solve_day_1(instructions: list[str]) -> int:
     return zero_count
 
 
+def solve_day_1_pt_2(instructions: list[str]) -> int:
+    current_pos = 50
+    zero_count = 0
+
+    for instruction in instructions:
+        num_clicks = parse_instruction(instruction)
+        direction = 1 if num_clicks > 0 else -1
+
+        while abs(num_clicks) > 0:
+            current_pos = (current_pos + direction) % 100
+            num_clicks -= direction
+
+            if current_pos == 0:
+                zero_count += 1
+
+    return zero_count
+
+
 if __name__ == "__main__":
-    print(solve_day_1(read_file("input.txt")))
+    instructions = read_file("input.txt")
+
+    print(solve_day_1_pt_1(instructions))
+    print(solve_day_1_pt_2(instructions))
