@@ -18,6 +18,10 @@ def has_repeating_patterns(s: str) -> bool:
     return s[:int(len(s) / 2)] == s[int(len(s) / 2):]
 
 
+def has_repeating_patterns_pt_2(s: str) -> bool:
+    return s in (s + s)[1:-1]
+
+
 def solve_day_2_pt_1(ranges: list[range]) -> int:
     invalid_ids = []
 
@@ -29,8 +33,20 @@ def solve_day_2_pt_1(ranges: list[range]) -> int:
     return sum(invalid_ids)
 
 
+def solve_day_2_pt_2(ranges: list[range]) -> int:
+    invalid_ids = []
+
+    for r in ranges:
+        for n in r:
+            if has_repeating_patterns_pt_2(str(n)):
+                invalid_ids.append(n)
+
+    return sum(invalid_ids)
+
+
 if __name__ == "__main__":
     problem_input = read_file("input.txt")[0]
     problem_ranges = parse_inputs_to_ranges(problem_input)
 
     print(solve_day_2_pt_1(problem_ranges))
+    print(solve_day_2_pt_2(problem_ranges))
