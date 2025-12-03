@@ -205,3 +205,13 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+### CUSTOM GITIGNORES
+# Hide input files as requested by AoC creator
+**/example_input.txt
+**/input.txt
+
+# IDE
+.idea
+.vscode
