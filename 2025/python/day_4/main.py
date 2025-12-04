@@ -14,6 +14,17 @@ def has_less_than_four_neighbours(diagram: list[str], x: int, y: int) -> bool:
     return neighbours < 4
 
 
+def remove_accessible_rolls(diagram: list[str]) -> list[str]:
+    updated_diagram = [[cell for cell in row] for row in diagram]
+
+    for x in range(len(diagram)):
+        for y in range(len(diagram[x])):
+            if has_less_than_four_neighbours(diagram, x, y):
+                updated_diagram[x][y] = "."
+
+    return updated_diagram
+
+
 def solve_day_4_pt_1(diagram: list[str]) -> int:
     accessible_rolls = 0
 
@@ -26,12 +37,20 @@ def solve_day_4_pt_1(diagram: list[str]) -> int:
 
 
 
-def solve_day_4_pt_2(paper_roll_diagram: list[str]) -> int:
-    pass
+def solve_day_4_pt_2(diagram: list[str]) -> int:
+    total_accessible_rolls = 0
+    currently_accessible_rolls = solve_day_4_pt_1(diagram)
+
+    while currently_accessible_rolls > 0:
+        total_accessible_rolls += currently_accessible_rolls
+        diagram = remove_accessible_rolls(diagram)
+        currently_accessible_rolls = solve_day_4_pt_1(diagram)
+
+    return total_accessible_rolls
 
 
 if __name__ == "__main__":
     diagram = read_file("input.txt")
 
     print(solve_day_4_pt_1(diagram))
-    # print(solve_day_4_pt_2(diagram))
+    print(solve_day_4_pt_2(diagram))
