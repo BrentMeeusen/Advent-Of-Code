@@ -2,30 +2,38 @@ from helpers import read_file
 import math
 
 
-def d(a: list[int], b: list[int]) -> float:
+def d(a: tuple[int, ...], b: tuple[int, ...]) -> float:
     return math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2)
 
 
 def merge(circuits: list[set]) -> list[set]:
-    merged_circuits = []
-
     for i, circuit in enumerate(circuits):
+        is_merged = False
         for j in range(i + 1, len(circuits)):
             if len(circuit.intersection(circuits[j])) > 0:
-                circuit.update(circuits[j])
+                circuit.update(circuits.pop(j))
+                is_merged = True
+                break
 
-        merged_circuits.append(circuit)
+        # There is only one removal to be made, so we can stop the execution when this is done
+        if is_merged:
+            break
 
-    return merged_circuits
+    return circuits
 
 
-def solve_day_8_pt_1(coordinates: list[list[int]], combinations: int) -> int:
-
-    # Generate 1D distance "matrix" and sort from shortest to longest distances between two points
-    sorted_distances = sorted({
+def generate_sorted_distances(coordinates: list[tuple[int, ...]]) -> list[tuple[int, int]]:
+    return sorted({
         (i * len(coordinates) + j): (0 if j <= i else d(coordinate, coordinates[j]))
         for i, coordinate in enumerate(coordinates) for j in range(len(coordinates))
+        if j > i
     }.items(), key=lambda item: item[1])
+
+
+def solve_day_8_pt_1(coordinates: list[tuple[int, ...]], combinations: int) -> int:
+
+    # Generate 1D distance "matrix" and sort from shortest to longest distances between two points
+    sorted_distances = generate_sorted_distances(coordinates)
 
     # Loop over the smallest distances
     circuits: list[set] = []
@@ -56,13 +64,35 @@ def solve_day_8_pt_1(coordinates: list[list[int]], combinations: int) -> int:
     return math.prod(sorted(map(len, circuits), reverse=True)[:3])
 
 
-def solve_day_8_pt_2(coordinates: list[list[int]]) -> int:
-    pass
+def solve_day_8_pt_2(coordinates: list[tuple[int, ...]]) -> int:
+
+    # Generate 1D distance "matrix" and sort from shortest to longest distances between two points, create 1-element sets
+    sorted_distances = generate_sorted_distances(coordinates)
+    circuits = {n: {n} for n in range(len(coordinates))}
+
+    # For each distance
+    for coordinate_index, _ in sorted_distances:
+
+        # Find the IDs of the coordinates that belong to the distance
+        coordinate_id_1 = coordinate_index // len(coordinates)
+        coordinate_id_2 = coordinate_index - (coordinate_id_1 * len(coordinates))
+
+        # Merge circuits together and make sure each element of the element has the same set reference
+        merged = circuits[coordinate_id_1] | circuits[coordinate_id_2]
+        for coordinate_id in merged:
+            circuits[coordinate_id] = merged
+
+        # If the last merge made all circuits join into one big network, return
+        if len(circuits[coordinate_id_2]) == len(coordinates):
+            return coordinates[coordinate_id_1][0] * coordinates[coordinate_id_2][0]
+
+    # Should not be reached
+    return -1
 
 
 if __name__ == "__main__":
     coordinates = read_file("input.txt")
-    coordinates = list(map(lambda n: list(map(int, n.split(","))), coordinates))
+    coordinates = list(map(lambda n: tuple(map(int, n.split(","))), coordinates))
 
     print(solve_day_8_pt_1(coordinates, 1000))
-    # print(solve_day_8_pt_2(coordinates))
+    print(solve_day_8_pt_2(coordinates))
